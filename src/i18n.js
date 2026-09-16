@@ -1,0 +1,216 @@
+import { ref } from 'vue'
+
+export const lang = ref(
+  typeof localStorage !== 'undefined' ? localStorage.getItem('friendzyLang') || 'es' : 'es'
+)
+
+const defaultTheme =
+  typeof localStorage !== 'undefined' ? localStorage.getItem('friendzyTheme') || 'naranja' : 'naranja'
+
+export const theme = ref(defaultTheme)
+
+const strings = {
+  es: {
+    cargando: 'Cargando...',
+    selecciona: 'Selecciona un usuario o una conversación',
+    para_chatear: 'para empezar a chatear en privado',
+    conecta_amigos: 'Conecta con amigos',
+    conecta_inteligente: 'de forma inteligente',
+    auth_intro:
+      'Chat en tiempo real, conoce nuevas personas y crea conexiones significativas en una plataforma segura.',
+    feat1: 'Mensajería en tiempo real',
+    feat2: 'Conoce personas de todo el mundo',
+    feat3: 'Seguridad y privacidad garantizada',
+    stat_users: 'Usuarios',
+    stat_msgs: 'Mensajes',
+    stat_uptime: 'Uptime',
+    mobile_tagline: 'Conecta con amigos de todo el mundo',
+    bienvenido: 'Bienvenido de vuelta',
+    crea_cuenta: 'Crea tu cuenta',
+    login_sub: 'Ingresa a tu cuenta para continuar',
+    reg_sub: 'Regístrate gratis y empieza a chatear',
+    google_in: 'Iniciar sesión con Google',
+    or_email: 'o con tu email',
+    nombre: 'Nombre',
+    tu_nombre: 'Tu nombre',
+    email: 'Email',
+    contrasena: 'Contraseña',
+    iniciar_login: 'Iniciar sesión',
+    crear: 'Crear cuenta',
+    no_cuenta: '¿No tienes cuenta?',
+    reg_gratis: 'Regístrate gratis',
+    ya_cuenta: '¿Ya tienes cuenta?',
+    inicia_sesion: 'Inicia sesión',
+    badge_seguro: 'Seguro',
+    badge_tiempo: 'Tiempo real',
+    badge_global: 'Global',
+    err_completa: 'Completa todos los campos',
+    err_email_pass: 'Email o contraseña incorrectos',
+    err_email_used: 'Este email ya está registrado',
+    err_invalid_email: 'Introduce un email válido',
+    err_weak: 'La contraseña debe tener al menos 6 caracteres',
+    err_too_many: 'Demasiados intentos. Intenta más tarde',
+    busqueda_ph: 'Buscar chats o personas...',
+    personas_reg: 'Personas registradas',
+    no_personas: 'No hay personas registradas',
+    solicitudes: 'Solicitudes',
+    quiere_chatear: 'Quiere chatear contigo',
+    amigos: 'Amigos',
+    en_linea: 'En línea',
+    conversaciones: 'Conversaciones',
+    sin_conv: 'Sin conversaciones todavía',
+    sin_conv_sub: 'Busca personas y envía una solicitud para chatear',
+    mi_perfil: 'Mi perfil',
+    configuracion: 'Configuración',
+    cerrar_sesion: 'Cerrar sesión',
+    chat: 'Chat',
+    pendiente: 'Pendiente',
+    aceptar: 'Aceptar',
+    solicitar: 'Solicitar',
+    favoritos: 'Favoritos',
+    sin_favoritos: 'Sin chats favoritos',
+    sin_mensajes: 'Sin mensajes todavía',
+    ahora: 'ahora',
+    grabar: 'Grabando · toca para terminar',
+    nota_larga: 'La nota es demasiado larga para enviarse',
+    enviar_ph: 'Escribe un mensaje...',
+    no_mensajes: 'No hay mensajes todavía',
+    envia_primero: '¡Envía el primero!',
+    hoy: 'Hoy',
+    ag_favoritos: 'Agregar a favoritos',
+    quitar_fav: 'Quitar de favoritos',
+    fotos_compartidas: 'Fotos compartidas',
+    sin_fotos: 'No hay fotos compartidas todavía',
+    idioma: 'Idioma',
+    tema: 'Tema',
+    naranja: 'Naranja',
+    azul: 'Azul',
+    espanol: 'Español',
+    english: 'English',
+    alias: 'Alias',
+    alias_ph: 'Tu alias en el chat',
+    cumpleanos: 'Fecha de nacimiento',
+    guardar: 'Guardar',
+    guardado: 'Guardado',
+    cambiar_foto: 'Cambiar foto',
+    foto_nombre: 'Foto de perfil',
+    mensaje_nuevo: 'Nuevo mensaje',
+    nueva_solicitud: 'Nueva solicitud de chat',
+    quieres_chatear: 'quiere chatear contigo',
+  },
+  en: {
+    cargando: 'Loading...',
+    selecciona: 'Select a user or conversation',
+    para_chatear: 'to start chatting privately',
+    conecta_amigos: 'Connect with friends',
+    conecta_inteligente: 'the smart way',
+    auth_intro:
+      'Real-time chat, meet new people and create meaningful connections on a secure platform.',
+    feat1: 'Real-time messaging',
+    feat2: 'Meet people from all over the world',
+    feat3: 'Security and privacy guaranteed',
+    stat_users: 'Users',
+    stat_msgs: 'Messages',
+    stat_uptime: 'Uptime',
+    mobile_tagline: 'Connect with friends from everywhere',
+    bienvenido: 'Welcome back',
+    crea_cuenta: 'Create your account',
+    login_sub: 'Sign in to continue',
+    reg_sub: 'Sign up for free and start chatting',
+    google_in: 'Continue with Google',
+    or_email: 'or with your email',
+    nombre: 'Name',
+    tu_nombre: 'Your name',
+    email: 'Email',
+    contrasena: 'Password',
+    iniciar_login: 'Sign in',
+    crear: 'Create account',
+    no_cuenta: 'Do not have an account?',
+    reg_gratis: 'Sign up free',
+    ya_cuenta: 'Already have an account?',
+    inicia_sesion: 'Sign in',
+    badge_seguro: 'Secure',
+    badge_tiempo: 'Real time',
+    badge_global: 'Global',
+    err_completa: 'Complete all fields',
+    err_email_pass: 'Incorrect email or password',
+    err_email_used: 'This email is already registered',
+    err_invalid_email: 'Enter a valid email',
+    err_weak: 'Password must be at least 6 characters',
+    err_too_many: 'Too many attempts. Try again later',
+    busqueda_ph: 'Search chats or people...',
+    personas_reg: 'Registered people',
+    no_personas: 'No registered people',
+    solicitudes: 'Requests',
+    quiere_chatear: 'Wants to chat with you',
+    amigos: 'Friends',
+    en_linea: 'Online',
+    conversaciones: 'Conversations',
+    sin_conv: 'No conversations yet',
+    sin_conv_sub: 'Search people and send a request to chat',
+    mi_perfil: 'My profile',
+    configuracion: 'Settings',
+    cerrar_sesion: 'Sign out',
+    chat: 'Chat',
+    pendiente: 'Pending',
+    aceptar: 'Accept',
+    solicitar: 'Request',
+    favoritos: 'Favorites',
+    sin_favoritos: 'No favorite chats',
+    sin_mensajes: 'No messages yet',
+    ahora: 'now',
+    grabar: 'Recording · tap to finish',
+    nota_larga: 'The voice note is too long to send',
+    enviar_ph: 'Write a message...',
+    no_mensajes: 'No messages yet',
+    envia_primero: 'Send the first one!',
+    hoy: 'Today',
+    ag_favoritos: 'Add to favorites',
+    quitar_fav: 'Remove from favorites',
+    fotos_compartidas: 'Shared photos',
+    sin_fotos: 'No shared photos yet',
+    idioma: 'Language',
+    tema: 'Theme',
+    naranja: 'Orange',
+    azul: 'Blue',
+    espanol: 'Español',
+    english: 'English',
+    alias: 'Alias',
+    alias_ph: 'Your chat alias',
+    cumpleanos: 'Birthday',
+    guardar: 'Save',
+    guardado: 'Saved',
+    cambiar_foto: 'Change photo',
+    foto_nombre: 'Profile photo',
+    mensaje_nuevo: 'New message',
+    nueva_solicitud: 'New chat request',
+    quieres_chatear: 'wants to chat with you',
+  },
+}
+
+export function setLang(l) {
+  lang.value = l
+  if (typeof localStorage !== 'undefined') localStorage.setItem('friendzyLang', l)
+}
+
+export function applyTheme(t = theme.value) {
+  const root = document.documentElement
+  if (t === 'azul') root.setAttribute('data-theme', 'azul')
+  else root.removeAttribute('data-theme')
+  const fav = document.getElementById('app-favicon')
+  if (fav && typeof import.meta !== 'undefined' && import.meta.env) {
+    const base = import.meta.env.BASE_URL || '/'
+    fav.href = base + (t === 'azul' ? 'favicon-azul.svg' : 'favicon.svg')
+  }
+}
+
+export function setTheme(t) {
+  theme.value = t
+  if (typeof localStorage !== 'undefined') localStorage.setItem('friendzyTheme', t)
+  applyTheme(t)
+}
+
+export function t(key) {
+  const dict = strings[lang.value] || strings.es
+  return dict[key] ?? strings.es[key] ?? key
+}

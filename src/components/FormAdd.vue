@@ -24,7 +24,7 @@
           ref="taRef"
           v-model="message"
           rows="1"
-          placeholder="Escribe un mensaje..."
+          :placeholder="t('enviar_ph')"
           class="ci-textarea"
           @input="autosize"
           @keydown.enter.exact.prevent="send"
@@ -48,9 +48,10 @@
     </div>
 
     <!-- Recording indicator -->
+    <!-- Recording indicator -->
     <div v-if="isRecording" class="ci-recording">
       <span class="ci-rec-dot"></span>
-      <span class="ci-rec-text">Grabando · toca para terminar</span>
+      <span class="ci-rec-text">{{ t('grabar') }}</span>
       <span class="ci-rec-time">{{ recLabel }}</span>
     </div>
     <!-- Voice notice -->
@@ -65,6 +66,7 @@ import { ref, nextTick, computed, onUnmounted } from 'vue'
 import { collection, doc, Timestamp, writeBatch, setDoc, increment, arrayUnion } from 'firebase/firestore'
 import { auth, db } from '../firebase'
 import { otherParticipantUid } from '../utils/chat'
+import { t } from '../i18n'
 
 const props = defineProps({
   conversationId: { type: String, required: true },
@@ -272,7 +274,7 @@ const sendAudio = (blob, duration) => {
     try {
       const audio = reader.result
       if (typeof audio !== 'string' || audio.length > 900000) {
-        voiceNotice.value = 'La nota es demasiado larga para enviarse'
+        voiceNotice.value = t('nota_larga')
         setTimeout(() => {
           voiceNotice.value = ''
         }, 4000)
@@ -444,7 +446,7 @@ onUnmounted(() => {
 
 .ci-send:hover {
   background: var(--primary-hover);
-  box-shadow: 0 4px 20px rgba(255, 106, 0, 0.35);
+  box-shadow: 0 4px 20px var(--shadow-primary);
 }
 
 .ci-send .mdi {

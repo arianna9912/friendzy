@@ -8,20 +8,17 @@
 
         <div class="auth-left-mid">
           <h1>
-            Conecta con amigos
+            {{ t('conecta_amigos') }}
             <br />
-            <span>de forma inteligente</span>
+            <span>{{ t('conecta_inteligente') }}</span>
           </h1>
-          <p>
-            Chat en tiempo real, conoce nuevas personas y crea conexiones
-            significativas en una plataforma segura.
-          </p>
+          <p>{{ t('auth_intro') }}</p>
           <ul>
-            <li v-for="(feature, index) in features" :key="index" class="auth-feature" :style="{ animationDelay: 0.3 + index * 0.1 + 's' }">
+            <li v-for="(key, index) in featureKeys" :key="key" class="auth-feature" :style="{ animationDelay: 0.3 + index * 0.1 + 's' }">
               <span class="auth-checkmark">
                 <i class="mdi mdi-check"></i>
               </span>
-              <span>{{ feature }}</span>
+              <span>{{ t(key) }}</span>
             </li>
           </ul>
         </div>
@@ -29,7 +26,7 @@
         <div class="auth-stats">
           <div v-for="stat in stats" :key="stat.label">
             <strong>{{ stat.value }}</strong>
-            <span>{{ stat.label }}</span>
+            <span>{{ t(stat.label) }}</span>
           </div>
         </div>
       </div>
@@ -43,38 +40,38 @@
         <!-- Mobile logo -->
         <div class="auth-mobile-logo">
           <Logo size="xl" showText center />
-          <p>Conecta con amigos de todo el mundo</p>
+          <p>{{ t('mobile_tagline') }}</p>
         </div>
 
         <!-- Form card -->
         <div class="auth-card">
           <div class="auth-card-head">
-            <h2>{{ mode === 'login' ? 'Bienvenido de vuelta' : 'Crea tu cuenta' }}</h2>
+            <h2>{{ mode === 'login' ? t('bienvenido') : t('crea_cuenta') }}</h2>
             <p>
-              {{ mode === 'login' ? 'Ingresa a tu cuenta para continuar' : 'Regístrate gratis y empieza a chatear' }}
+              {{ mode === 'login' ? t('login_sub') : t('reg_sub') }}
             </p>
           </div>
 
           <button class="google-btn" type="button" @click="googleAccess">
             <GoogleIcon />
-            <span>Iniciar sesión con Google</span>
+            <span>{{ t('google_in') }}</span>
           </button>
 
           <div class="divider">
-            <span>o con tu email</span>
+            <span>{{ t('or_email') }}</span>
           </div>
 
           <div class="fields">
             <div v-if="mode === 'register'" class="field">
-              <label>Nombre</label>
-              <input v-model="name" type="text" placeholder="Tu nombre" />
+              <label>{{ t('nombre') }}</label>
+              <input v-model="name" type="text" :placeholder="t('tu_nombre')" />
             </div>
             <div class="field">
-              <label>Email</label>
+              <label>{{ t('email') }}</label>
               <input v-model="email" type="email" placeholder="tu@email.com" />
             </div>
             <div class="field">
-              <label>Contraseña</label>
+              <label>{{ t('contrasena') }}</label>
               <input
                 v-model="password"
                 type="password"
@@ -90,18 +87,18 @@
           </div>
 
           <button class="submit-btn btn-primary" type="button" :disabled="loading" @click="submit">
-            <span>{{ loading ? 'Cargando...' : mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta' }}</span>
+            <span>{{ loading ? t('cargando') : mode === 'login' ? t('iniciar_login') : t('crear') }}</span>
             <i class="mdi mdi-arrow-right"></i>
           </button>
 
           <p class="switch-link">
             <template v-if="mode === 'login'">
-              ¿No tienes cuenta?
-              <a href="#" @click.prevent="switchMode('register')">Regístrate gratis</a>
+              {{ t('no_cuenta') }}
+              <a href="#" @click.prevent="switchMode('register')">{{ t('reg_gratis') }}</a>
             </template>
             <template v-else>
-              ¿Ya tienes cuenta?
-              <a href="#" @click.prevent="switchMode('login')">Inicia sesión</a>
+              {{ t('ya_cuenta') }}
+              <a href="#" @click.prevent="switchMode('login')">{{ t('inicia_sesion') }}</a>
             </template>
           </p>
         </div>
@@ -110,15 +107,15 @@
         <div class="auth-badges">
           <div class="auth-badge">
             <i class="mdi mdi-shield-lock-outline"></i>
-            <span>Seguro</span>
+            <span>{{ t('badge_seguro') }}</span>
           </div>
           <div class="auth-badge">
             <i class="mdi mdi-message-text-clock-outline"></i>
-            <span>Tiempo real</span>
+            <span>{{ t('badge_tiempo') }}</span>
           </div>
           <div class="auth-badge">
             <i class="mdi mdi-web"></i>
-            <span>Global</span>
+            <span>{{ t('badge_global') }}</span>
           </div>
         </div>
       </div>
@@ -136,6 +133,7 @@ import {
   updateProfile,
 } from 'firebase/auth'
 import { auth } from '../firebase'
+import { t } from '../i18n'
 import Logo from './Logo.vue'
 import GoogleIcon from './GoogleIcon.vue'
 
@@ -146,16 +144,12 @@ const name = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
 
-const features = [
-  'Mensajería en tiempo real',
-  'Conoce personas de todo el mundo',
-  'Seguridad y privacidad garantizada',
-]
+const featureKeys = ['feat1', 'feat2', 'feat3']
 
 const stats = [
-  { value: '10K+', label: 'Usuarios' },
-  { value: '50K+', label: 'Mensajes' },
-  { value: '99%', label: 'Uptime' },
+  { value: '10K+', label: 'stat_users' },
+  { value: '50K+', label: 'stat_msgs' },
+  { value: '99%', label: 'stat_uptime' },
 ]
 
 const switchMode = (m) => {
@@ -177,15 +171,15 @@ const friendlyError = (code) => {
     case 'auth/invalid-credential':
     case 'auth/user-not-found':
     case 'auth/wrong-password':
-      return 'Email o contraseña incorrectos'
+      return t('err_email_pass')
     case 'auth/email-already-in-use':
-      return 'Este email ya está registrado'
+      return t('err_email_used')
     case 'auth/invalid-email':
-      return 'Introduce un email válido'
+      return t('err_invalid_email')
     case 'auth/weak-password':
-      return 'La contraseña debe tener al menos 6 caracteres'
+      return t('err_weak')
     case 'auth/too-many-requests':
-      return 'Demasiados intentos. Intenta más tarde'
+      return t('err_too_many')
     default:
       return `Error: ${code}`
   }
@@ -194,11 +188,11 @@ const friendlyError = (code) => {
 const submit = async () => {
   errorMsg.value = ''
   if (!email.value.trim() || !password.value) {
-    errorMsg.value = 'Completa todos los campos'
+    errorMsg.value = t('err_completa')
     return
   }
   if (password.value.length < 6) {
-    errorMsg.value = 'La contraseña debe tener al menos 6 caracteres'
+    errorMsg.value = t('err_weak')
     return
   }
 
@@ -239,7 +233,7 @@ const submit = async () => {
   display: none;
   width: 45%;
   position: relative;
-  background: linear-gradient(135deg, #ff8a1e 0%, #ff5a00 100%);
+  background: linear-gradient(135deg, var(--grad-top) 0%, var(--grad-bottom) 100%);
   flex-direction: column;
 }
 

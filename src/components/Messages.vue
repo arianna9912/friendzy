@@ -15,26 +15,46 @@
         <h2>{{ other.name }}</h2>
         <p>
           <span class="cm-status-dot"></span>
-          En línea
+          {{ t('en_linea') }}
         </p>
       </div>
 
       <div class="cm-header-actions">
-        <button class="icon-btn">
-          <i class="mdi mdi-dots-horizontal"></i>
-        </button>
+        <div class="cm-menu">
+          <button
+            class="icon-btn"
+            :class="{ active: menuOpen }"
+            @click="menuOpen = !menuOpen"
+          >
+            <i class="mdi mdi-dots-horizontal"></i>
+          </button>
+          <div v-if="menuOpen" class="cm-pop">
+            <button class="cm-pop-item" @click="onProfile">
+              <i class="mdi mdi-account-circle-outline"></i>
+              <span>{{ t('mi_perfil') }}</span>
+            </button>
+            <button class="cm-pop-item" @click="onToggleFav">
+              <i :class="['mdi', isFavorite ? 'mdi-star' : 'mdi-star-outline']"></i>
+              <span>{{ isFavorite ? t('quitar_fav') : t('ag_favoritos') }}</span>
+            </button>
+            <button class="cm-pop-item" @click="openPhotos">
+              <i class="mdi mdi-image-multiple-outline"></i>
+              <span>{{ t('fotos_compartidas') }}</span>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
     <!-- Messages Area -->
     <div v-if="message.length === 0" class="cm-empty">
       <i class="mdi mdi-chat-processing-outline cm-empty-icon"></i>
-      <p>No hay mensajes todavía</p>
-      <p class="cm-empty-sub">¡Envía el primero!</p>
+      <p>{{ t('no_mensajes') }}</p>
+      <p class="cm-empty-sub">{{ t('envia_primero') }}</p>
     </div>
 
     <div v-else class="cm-list" ref="listRef">
-      <div class="cm-date-pill">Hoy</div>
+      <div class="cm-date-pill">{{ t('hoy') }}</div>
       <MessageBubble
         v-for="(item, index) in message"
         :key="item.id"
@@ -48,6 +68,32 @@
 
     <!-- Input Area -->
     <FormAdd v-if="conversationId" :conversation-id="conversationId" />
+
+    <!-- Photos overlay -->
+    <div v-if="photosOpen" class="cm-modal" @click.self="photosOpen = false">
+      <div class="cm-photos">
+        <div class="cm-photos-head">
+          <h4>{{ t('fotos_compartidas') }}</h4>
+          <button class="icon-btn" @click="photosOpen = false">
+            <i class="mdi mdi-close"></i>
+          </button>
+        </div>
+        <div v-if="photoList.length" class="cm-photos-grid">
+          <img
+            v-for="(m) in photoList"
+            :key="m.id"
+            :src="m.image"
+            alt="Foto"
+            @click="lightbox = m.image"
+          />
+        </div>
+        <p v-else class="cm-photos-empty">{{ t('sin_fotos') }}</p>
+      </div>
+    </div>
+
+    <div v-if="lightbox" class="cm-lightbox" @click="lightbox = ''">
+      <img :src="lightbox" alt="Foto" />
+    </div>
   </div>
 </template>
 
@@ -55,6 +101,7 @@
 import { ref, watch, onUnmounted, nextTick, computed } from 'vue'
 import { db, auth } from '../firebase'
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'
+import { t } from '../i18n'
 import MessageBubble from './MessageBubble.vue'
 import PremiumAvatar from './PremiumAvatar.vue'
 import FormAdd from './FormAdd.vue'
@@ -62,14 +109,35 @@ import FormAdd from './FormAdd.vue'
 const props = defineProps({
   conversationId: { type: String, required: true },
   other: { type: Object, default: () => ({}) },
+  isFavorite: { type: Boolean, default: false },
 })
 
-defineEmits(['openDrawer'])
+const emit = defineEmits(['openDrawer', 'openProfile', 'toggleFavorite'])
 
 const userChat = ref(auth.currentUser)
 const userPhoto = computed(() => userChat.value?.photoURL || '')
 const message = ref([])
 const listRef = ref(null)
+const menuOpen = ref(false)
+const photosOpen = ref(false)
+const lightbox = ref('')
+
+const photoList = computed(() => message.value.filter((m) => m.image))
+
+const onProfile = () => {
+  menuOpen.value = false
+  emit('openProfile')
+}
+
+const onToggleFav = () => {
+  menuOpen.value = false
+  emit('toggleFavorite', props.conversationId)
+}
+
+const openPhotos = () => {
+  menuOpen.value = false
+  photosOpen.value = true
+}
 
 let unsub = null
 
@@ -175,11 +243,143 @@ onUnmounted(() => {
 .cm-header-actions {
   display: flex;
   gap: 4px;
+  position: relative;
 }
 
 .cm-header-actions .icon-btn {
   width: 36px;
   height: 36px;
+}
+
+.cm-header-actions .icon-btn.active {
+  background: var(--secondary);
+}
+
+.cm-menu {
+  position: relative;
+}
+
+.cm-pop {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  z-index: 12;
+  width: 220px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  animation: scale-in 0.15s ease-out;
+}
+
+.cm-pop-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 13px;
+  color: var(--foreground);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.cm-pop-item:hover {
+  background: var(--secondary);
+}
+
+.cm-pop-item .mdi {
+  font-size: 16px;
+  color: var(--primary);
+}
+
+.cm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.cm-photos {
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  animation: scale-in 0.2s ease-out;
+}
+
+.cm-photos-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cm-photos-head h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.cm-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.cm-photos-grid img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.cm-photos-grid img:hover {
+  transform: scale(1.03);
+}
+
+.cm-photos-empty {
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  margin: 32px 0;
+}
+
+.cm-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  cursor: zoom-out;
+}
+
+.cm-lightbox img {
+  max-width: 92vw;
+  max-height: 90vh;
+  border-radius: 8px;
 }
 
 @media (max-width: 767px) {

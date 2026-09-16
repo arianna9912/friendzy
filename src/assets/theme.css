@@ -12,6 +12,23 @@
   --sidebar: #fcfcfc;
   --destructive: #ef4444;
   --ring: rgba(255, 106, 0, 0.2);
+  --grad-top: #ff8a1e;
+  --grad-bottom: #ff5a00;
+  --shadow-primary: rgba(255, 106, 0, 0.35);
+  --scroll-thumb: rgba(255, 106, 0, 0.3);
+  --scroll-thumb-hover: rgba(255, 106, 0, 0.5);
+}
+
+[data-theme='azul'] {
+  --primary: #0d6efd;
+  --primary-hover: #0b5ed7;
+  --primary-soft: rgba(13, 110, 253, 0.1);
+  --ring: rgba(13, 110, 253, 0.2);
+  --grad-top: #4da3ff;
+  --grad-bottom: #0b5ed7;
+  --shadow-primary: rgba(13, 110, 253, 0.35);
+  --scroll-thumb: rgba(13, 110, 253, 0.3);
+  --scroll-thumb-hover: rgba(13, 110, 253, 0.5);
 }
 
 body {
@@ -39,7 +56,7 @@ button {
 
 /* Orange gradient for branding */
 .gradient-orange {
-  background: linear-gradient(135deg, #ff8a1e 0%, #ff5a00 100%);
+  background: linear-gradient(135deg, var(--grad-top) 0%, var(--grad-bottom) 100%);
 }
 
 /* Primary button */
@@ -50,12 +67,12 @@ button {
 }
 
 .btn-primary:hover {
-  box-shadow: 0 4px 20px rgba(255, 106, 0, 0.35);
+  box-shadow: 0 4px 20px var(--shadow-primary);
 }
 
 /* Avatar ring */
 .avatar-ring {
-  background: linear-gradient(135deg, #ff8a1e, #ff5a00);
+  background: linear-gradient(135deg, var(--grad-top), var(--grad-bottom));
   padding: 2px;
   border-radius: 9999px;
 }
@@ -71,12 +88,12 @@ button {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 106, 0, 0.3);
+  background: var(--scroll-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 106, 0, 0.5);
+  background: var(--scroll-thumb-hover);
 }
 
 /* Animations */

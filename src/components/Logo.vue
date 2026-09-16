@@ -18,7 +18,7 @@
         />
         <path
           d="M12 8C11 6.5 9 6.5 8 8C7 9.5 8 11 12 14C16 11 17 9.5 16 8C15 6.5 13 6.5 12 8Z"
-          fill="#FF6A00"
+          style="fill: var(--primary)"
         />
       </svg>
     </div>

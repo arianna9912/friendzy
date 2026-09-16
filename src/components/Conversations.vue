@@ -20,14 +20,18 @@
       </button>
 
       <div v-if="profileOpen" class="sb-menu">
-        <button class="sb-menu-item" @click="profileOpen = false">
+        <button class="sb-menu-item" @click="openProfile">
+          <i class="mdi mdi-account-circle-outline"></i>
+          <span>{{ t('mi_perfil') }}</span>
+        </button>
+        <button class="sb-menu-item" @click="openSettings">
           <i class="mdi mdi-cog-outline"></i>
-          <span>Configuración</span>
+          <span>{{ t('configuracion') }}</span>
         </button>
         <div class="sb-menu-sep"></div>
         <button class="sb-menu-item sb-menu-danger" @click="logout">
           <i class="mdi mdi-logout"></i>
-          <span>Cerrar sesión</span>
+          <span>{{ t('cerrar_sesion') }}</span>
         </button>
       </div>
     </div>
@@ -39,7 +43,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Buscar chats o personas..."
+          :placeholder="t('busqueda_ph')"
           class="sb-search-input"
         />
       </div>
@@ -50,7 +54,7 @@
       <div v-if="addOpen" class="sb-newchat">
         <div class="sb-label">
           <i class="mdi mdi-account-multiple-outline"></i>
-          <span>Personas registradas</span>
+          <span>{{ t('personas_reg') }}</span>
         </div>
         <button
           v-for="u in searchUsers"
@@ -74,11 +78,11 @@
           </span>
           <span v-else class="btn-status btn-friend" @click.stop="startWith(u)">
             <i class="mdi mdi-message-outline"></i>
-            <span>Chat</span>
+            <span>{{ t('chat') }}</span>
           </span>
         </button>
         <p v-if="searchUsers.length === 0" class="sb-empty-note">
-          No hay personas registradas
+          {{ t('no_personas') }}
         </p>
       </div>
     </div>
@@ -88,7 +92,7 @@
       <div class="sb-section">
         <div class="sb-label">
           <i class="mdi mdi-bell-outline"></i>
-          <span>Solicitudes</span>
+          <span>{{ t('solicitudes') }}</span>
         </div>
         <span class="sb-count sb-count-alert">{{ incomingPending.length }}</span>
       </div>
@@ -105,7 +109,7 @@
               <span class="conv-name">{{ userOf(r.from)?.displayName || r.from }}</span>
             </div>
             <div class="conv-bottom">
-              <span class="conv-preview">Quiere chatear contigo</span>
+              <span class="conv-preview">{{ t('quiere_chatear') }}</span>
             </div>
           </div>
           <button class="req-btn req-ok" title="Aceptar" @click="acceptRequest(r)">
@@ -123,7 +127,7 @@
       <div class="sb-section">
         <div class="sb-label">
           <i class="mdi mdi-heart"></i>
-          <span>Amigos</span>
+          <span>{{ t('amigos') }}</span>
         </div>
         <span class="sb-count">{{ contactUsers.length }}</span>
       </div>
@@ -140,7 +144,7 @@
               <span class="conv-name">{{ u.displayName }}</span>
             </div>
             <div class="conv-bottom">
-              <span class="conv-preview">En línea</span>
+              <span class="conv-preview">{{ t('en_linea') }}</span>
             </div>
           </div>
           <button class="friend-remove" @click.stop="unfriend(u)">
@@ -150,11 +154,42 @@
       </div>
     </template>
 
+    <!-- Favoritos -->
+    <template v-if="favoriteConvs.length">
+      <div class="sb-section">
+        <div class="sb-label">
+          <i class="mdi mdi-star"></i>
+          <span>{{ t('favoritos') }}</span>
+        </div>
+        <span class="sb-count">{{ favoriteConvs.length }}</span>
+      </div>
+      <div class="sb-list">
+        <button
+          v-for="c in favoriteConvs"
+          :key="c.id"
+          class="conv-item"
+          :class="{ active: c.id === activeId }"
+          @click="openConversation(c)"
+        >
+          <PremiumAvatar :name="otherName(c)" size="lg" online />
+          <div class="conv-body">
+            <div class="conv-top">
+              <span class="conv-name">{{ otherName(c) }}</span>
+              <i class="mdi mdi-star conv-star"></i>
+            </div>
+            <div class="conv-bottom">
+              <span class="conv-preview">{{ lastPreview(c) }}</span>
+            </div>
+          </div>
+        </button>
+      </div>
+    </template>
+
     <!-- Conversaciones -->
     <div class="sb-section">
       <div class="sb-label">
         <i class="mdi mdi-message-text-outline"></i>
-        <span>Conversaciones</span>
+        <span>{{ t('conversaciones') }}</span>
       </div>
       <span class="sb-count">{{ filteredConversations.length }}</span>
     </div>
@@ -171,10 +206,13 @@
         <div class="conv-body">
           <div class="conv-top">
             <span class="conv-name">{{ otherName(c) }}</span>
-            <span v-if="(c.unread?.[currentUser.uid] || 0) > 0" class="conv-badge">
-              {{ c.unread[currentUser.uid] }}
+            <span class="conv-right">
+              <i v-if="isFav(c.id)" class="mdi mdi-star conv-star"></i>
+              <span v-if="(c.unread?.[currentUser.uid] || 0) > 0" class="conv-badge">
+                {{ c.unread[currentUser.uid] }}
+              </span>
+              <span v-else class="conv-time">{{ relTime(c.lastAt) }}</span>
             </span>
-            <span v-else class="conv-time">{{ relTime(c.lastAt) }}</span>
           </div>
           <div class="conv-bottom">
             <span class="conv-preview">{{ lastPreview(c) }}</span>
@@ -183,8 +221,8 @@
       </button>
 
       <div v-if="filteredConversations.length === 0" class="sb-empty">
-        <p>Sin conversaciones todavía</p>
-        <p class="sb-empty-sub">Busca personas y envía una solicitud para chatear</p>
+        <p>{{ t('sin_conv') }}</p>
+        <p class="sb-empty-sub">{{ t('sin_conv_sub') }}</p>
       </div>
     </div>
   </div>
@@ -200,13 +238,16 @@ import {
 import { signOut } from 'firebase/auth'
 import { getConversationId, otherParticipantUid } from '../utils/chat'
 import { notify, beep, ensurePermission } from '../utils/notify'
+import { t } from '../i18n'
 import Logo from './Logo.vue'
 import PremiumAvatar from './PremiumAvatar.vue'
 
-const emit = defineEmits(['open', 'close'])
+const emit = defineEmits(['open', 'close', 'openProfile', 'openSettings'])
 const props = defineProps({
   activeId: { type: String, default: '' },
   isMobile: { type: Boolean, default: false },
+  profile: { type: Object, default: () => ({}) },
+  favorites: { type: Array, default: () => [] },
 })
 
 const currentUser = auth.currentUser
@@ -222,9 +263,9 @@ const searchQuery = ref('')
 const profileOpen = ref(false)
 const addOpen = ref(false)
 
-const userDisplayName = currentUser?.displayName || currentUser?.email || 'Usuario'
+const userDisplayName = computed(() => props.profile.displayName || currentUser?.displayName || currentUser?.email || 'Usuario')
 const userEmail = currentUser?.email || ''
-const userPhoto = currentUser?.photoURL || ''
+const userPhoto = computed(() => props.profile.photoURL || currentUser?.photoURL || '')
 
 let unsubUsers = null
 let unsubConvs = null
@@ -275,7 +316,7 @@ onMounted(() => {
           const uid = otherParticipantUid(d.id, currentUser.uid)
           const other = users.value.find((u) => u.uid === uid)
           const body = typeof data.lastMessage === 'string' ? data.lastMessage : '📷 Foto'
-          notify(`Nuevo mensaje de ${other?.displayName || ''}`, body)
+          notify(`${t('mensaje_nuevo')} de ${other?.displayName || ''}`, body)
           beep()
         }
       })
@@ -303,7 +344,7 @@ onMounted(() => {
         if (ch.type === 'added') {
           const r = ch.doc.data()
           const other = users.value.find((u) => u.uid === r.from)
-          notify('Nueva solicitud de chat', `${other?.displayName || 'Alguien'} quiere chatear contigo`)
+          notify(t('nueva_solicitud'), `${other?.displayName || 'Alguien'} ${t('quieres_chatear')}`)
           beep()
         }
       })
@@ -357,6 +398,20 @@ onUnmounted(() => {
   if (closeHandler) document.removeEventListener('click', closeHandler)
 })
 
+const openProfile = () => {
+  profileOpen.value = false
+  emit('openProfile')
+}
+
+const openSettings = () => {
+  profileOpen.value = false
+  emit('openSettings')
+}
+
+const isFav = (id) => props.favorites.includes(id)
+
+const favoriteConvs = computed(() => conversations.value.filter((c) => isFav(c.id)))
+
 const mergeAccepted = () => {
   acceptedReq.value = [...acceptedIn.value, ...acceptedOut.value]
 }
@@ -388,7 +443,7 @@ const statusOf = (u) => {
 }
 
 const statusLabel = (s) =>
-  s === 'pending' ? 'Pendiente' : s === 'incoming' ? 'Aceptar' : 'Solicitar'
+  s === 'pending' ? t('pendiente') : s === 'incoming' ? t('aceptar') : t('solicitar')
 
 const statusIcon = (s) =>
   s === 'pending' ? 'mdi-clock-outline' : s === 'incoming' ? 'mdi-check' : 'mdi-account-plus-outline'
@@ -457,7 +512,7 @@ const otherName = (c) => {
   return u ? u.displayName : uid
 }
 
-const lastPreview = (c) => (c.lastMessage ? c.lastMessage : 'Sin mensajes todavía')
+const lastPreview = (c) => (c.lastMessage ? c.lastMessage : t('sin_mensajes'))
 
 const q = computed(() => searchQuery.value.trim().toLowerCase())
 
@@ -482,7 +537,7 @@ const relTime = (ts) => {
   const ms = ts?.toMillis?.() ?? 0
   if (!ms) return ''
   const diff = Math.floor((Date.now() - ms) / 1000)
-  if (diff < 60) return 'ahora'
+  if (diff < 60) return t('ahora')
   if (diff < 3600) return `${Math.floor(diff / 60)}m`
   if (diff < 86400) return `${Math.floor(diff / 3600)}h`
   if (diff < 604800) return `${Math.floor(diff / 86400)}d`
@@ -717,8 +772,8 @@ const logout = async () => {
 }
 
 .sb-plus:hover {
-  background: var(--primary);
-  box-shadow: 0 4px 20px rgba(255, 106, 0, 0.35);
+  background: var(--primary-hover);
+  box-shadow: 0 4px 20px var(--shadow-primary);
 }
 
 .sb-newchat {
@@ -903,6 +958,18 @@ const logout = async () => {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.conv-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.conv-star {
+  font-size: 14px;
+  color: var(--primary);
 }
 
 .conv-name {

@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <script>
+      try {
+        if (localStorage.getItem('friendzyTheme') === 'azul') {
+          document.documentElement.setAttribute('data-theme', 'azul')
+        }
+      } catch (e) {}
+    </script>
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" id="app-favicon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Friendzy · Chat privado</title>
 </head>
