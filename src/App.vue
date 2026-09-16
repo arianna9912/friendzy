@@ -39,6 +39,7 @@
       v-if="activeConversation"
       :conversation-id="activeConversation.id"
       :other="activeConversation.other"
+      :profile="profile"
       :is-favorite="isActiveFav"
       @open-drawer="mobileOpen = true"
       @open-profile="profileOpen = true"
@@ -64,6 +65,7 @@ import {
   doc,
   setDoc,
   updateDoc,
+  getDoc,
   onSnapshot,
   arrayUnion,
   arrayRemove,
@@ -119,17 +121,20 @@ onAuthStateChanged(auth, async (user) => {
   authLoaded.value = true
   if (user) {
     try {
-      await setDoc(
-        doc(db, 'users', user.uid),
-        {
+      const me = doc(db, 'users', user.uid)
+      const snap = await getDoc(me)
+      if (!snap.exists()) {
+        await setDoc(me, {
           uid: user.uid,
           displayName: user.displayName || user.email,
           email: user.email,
           photoURL: user.photoURL || '',
           lastSeen: serverTimestamp(),
-        },
-        { merge: true }
-      )
+          createdAt: serverTimestamp(),
+        })
+      } else {
+        await updateDoc(me, { lastSeen: serverTimestamp() })
+      }
     } catch (error) {
       console.error('Error registrando usuario:', error)
     }

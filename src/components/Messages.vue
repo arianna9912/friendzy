@@ -109,13 +109,18 @@ import FormAdd from './FormAdd.vue'
 const props = defineProps({
   conversationId: { type: String, required: true },
   other: { type: Object, default: () => ({}) },
+  profile: { type: Object, default: () => ({}) },
   isFavorite: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['openDrawer', 'openProfile', 'toggleFavorite'])
 
-const userChat = ref(auth.currentUser)
-const userPhoto = computed(() => userChat.value?.photoURL || '')
+const userChat = computed(() => ({
+  uid: auth.currentUser?.uid || '',
+  displayName:
+    props.profile?.displayName || auth.currentUser?.displayName || auth.currentUser?.email || '',
+}))
+const userPhoto = computed(() => props.profile?.photoURL || auth.currentUser?.photoURL || '')
 const message = ref([])
 const listRef = ref(null)
 const menuOpen = ref(false)
