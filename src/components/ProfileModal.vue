@@ -130,9 +130,7 @@ const save = async () => {
       () => {}
     )
     saved.value = true
-    setTimeout(() => {
-      saved.value = false
-    }, 2500)
+    setTimeout(() => emit('close'), 600)
   } catch (error) {
     console.log(error)
   } finally {

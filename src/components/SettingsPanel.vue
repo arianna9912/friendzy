@@ -17,7 +17,7 @@
           <button
             class="set-opt"
             :class="{ active: lang === 'es' }"
-            @click="setLang('es')"
+            @click="pickLang('es')"
           >
             <span class="set-flag">🇪🇸</span>
             {{ t('espanol') }}
@@ -25,7 +25,7 @@
           <button
             class="set-opt"
             :class="{ active: lang === 'en' }"
-            @click="setLang('en')"
+            @click="pickLang('en')"
           >
             <span class="set-flag">🇺🇸</span>
             {{ t('english') }}
@@ -42,7 +42,7 @@
           <button
             class="set-opt set-theme"
             :class="{ active: theme === 'naranja' }"
-            @click="setTheme('naranja')"
+            @click="pickTheme('naranja')"
           >
             <span class="swatch swatch-orange"></span>
             {{ t('naranja') }}
@@ -50,7 +50,7 @@
           <button
             class="set-opt set-theme"
             :class="{ active: theme === 'azul' }"
-            @click="setTheme('azul')"
+            @click="pickTheme('azul')"
           >
             <span class="swatch swatch-blue"></span>
             {{ t('azul') }}
@@ -64,7 +64,19 @@
 <script setup>
 import { t, lang, setLang, theme, setTheme } from '../i18n'
 
-defineEmits(['close'])
+const emit = defineEmits(['close'])
+
+const closeAfter = () => setTimeout(() => emit('close'), 350)
+
+const pickLang = (l) => {
+  setLang(l)
+  closeAfter()
+}
+
+const pickTheme = (th) => {
+  setTheme(th)
+  closeAfter()
+}
 </script>
 
 <style scoped>
