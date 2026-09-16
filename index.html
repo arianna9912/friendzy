@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/friendzy/favicon.svg" />
+    <script>
+      try {
+        if (localStorage.getItem('friendzyTheme') === 'azul') {
+          document.documentElement.setAttribute('data-theme', 'azul')
+        }
+      } catch (e) {}
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/friendzy/favicon.svg" id="app-favicon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Friendzy · Chat privado</title>
-  <script type="module" crossorigin src="/friendzy/assets/index-CJ_hmDG1.js"></script>
-  <link rel="stylesheet" crossorigin href="/friendzy/assets/index-B24coy3D.css">
+  <script type="module" crossorigin src="/friendzy/assets/index-fg75TuI4.js"></script>
+  <link rel="stylesheet" crossorigin href="/friendzy/assets/index-DMAvD1wS.css">
 </head>
 
 <body>
