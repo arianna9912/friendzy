@@ -60,7 +60,7 @@
 
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, updateProfile } from 'firebase/auth'
 import {
   doc,
   setDoc,
@@ -121,19 +121,28 @@ onAuthStateChanged(auth, async (user) => {
   authLoaded.value = true
   if (user) {
     try {
+      const firstWord = (s) => (s || '').trim().split(/\s+/)[0] || ''
       const me = doc(db, 'users', user.uid)
       const snap = await getDoc(me)
       if (!snap.exists()) {
+        const alias = firstWord(user.displayName) || firstWord(user.email)
         await setDoc(me, {
           uid: user.uid,
-          displayName: user.displayName || user.email,
+          displayName: alias,
           email: user.email,
           photoURL: user.photoURL || '',
           lastSeen: serverTimestamp(),
           createdAt: serverTimestamp(),
         })
+        updateProfile(auth.currentUser, { displayName: alias }).catch(() => {})
       } else {
-        await updateDoc(me, { lastSeen: serverTimestamp() })
+        const data = snap.data()
+        const updates = { lastSeen: serverTimestamp() }
+        const full = firstWord(user.displayName)
+        if (full && data.displayName && data.displayName === (user.displayName || '') && data.displayName.includes(' ') && data.displayName !== full) {
+          updates.displayName = full
+        }
+        await updateDoc(me, updates)
       }
     } catch (error) {
       console.error('Error registrando usuario:', error)

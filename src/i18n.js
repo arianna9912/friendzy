@@ -97,6 +97,7 @@ const strings = {
     mensaje_nuevo: 'Nuevo mensaje',
     nueva_solicitud: 'Nueva solicitud de chat',
     quieres_chatear: 'quiere chatear contigo',
+    max_3_fotos: 'Máximo 3 fotos por envío',
   },
   en: {
     cargando: 'Loading...',
@@ -185,6 +186,7 @@ const strings = {
     mensaje_nuevo: 'New message',
     nueva_solicitud: 'New chat request',
     quieres_chatear: 'wants to chat with you',
+    max_3_fotos: 'Maximum 3 photos per send',
   },
 }
 

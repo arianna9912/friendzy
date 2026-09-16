@@ -207,7 +207,7 @@ const submit = async () => {
         password.value
       )
       if (name.value.trim()) {
-        await updateProfile(user, { displayName: name.value.trim() })
+        await updateProfile(user, { displayName: name.value.trim().split(/\s+/)[0] })
       }
     }
   } catch (error) {

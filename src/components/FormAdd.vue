@@ -8,7 +8,7 @@
       </button>
     </div>
 
-    <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleImage" />
+    <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="handleImages" />
 
     <div class="ci-row">
       <button
@@ -48,7 +48,6 @@
     </div>
 
     <!-- Recording indicator -->
-    <!-- Recording indicator -->
     <div v-if="isRecording" class="ci-recording">
       <span class="ci-rec-dot"></span>
       <span class="ci-rec-text">{{ t('grabar') }}</span>
@@ -57,6 +56,10 @@
     <!-- Voice notice -->
     <div v-if="voiceNotice" class="ci-recording">
       <span class="ci-rec-text">{{ voiceNotice }}</span>
+    </div>
+    <!-- Photo notice -->
+    <div v-if="photoNotice" class="ci-recording">
+      <span class="ci-rec-text">{{ photoNotice }}</span>
     </div>
   </div>
 </template>
@@ -77,10 +80,12 @@ const attachOpen = ref(false)
 const isRecording = ref(false)
 const recTime = ref(0)
 const voiceNotice = ref('')
+const photoNotice = ref('')
 const taRef = ref(null)
 const fileInput = ref(null)
 
 const MAX_REC_MS = 30000
+const MAX_FOTOS = 3
 
 const recLabel = computed(() => {
   const s = Math.floor(recTime.value / 1000)
@@ -142,11 +147,24 @@ const pickImage = () => {
   fileInput.value?.click()
 }
 
-const handleImage = async (e) => {
-  const file = e.target.files?.[0]
+const handleImages = async (e) => {
+  const files = [...(e.target.files || [])]
   e.target.value = ''
-  if (!file || !props.conversationId) return
+  if (!files.length || !props.conversationId) return
 
+  if (files.length > MAX_FOTOS) {
+    photoNotice.value = t('max_3_fotos')
+    setTimeout(() => {
+      photoNotice.value = ''
+    }, 4000)
+  }
+
+  for (const file of files.slice(0, MAX_FOTOS)) {
+    await sendImage(file)
+  }
+}
+
+const sendImage = async (file) => {
   try {
     const dataURL = await resizeImage(file)
     if (!dataURL) return

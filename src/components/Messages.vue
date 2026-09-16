@@ -325,6 +325,7 @@ onUnmounted(() => {
   padding: 16px;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
   animation: scale-in 0.2s ease-out;
 }
 
@@ -344,13 +345,16 @@ onUnmounted(() => {
 
 .cm-photos-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .cm-photos-grid img {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 8px;
