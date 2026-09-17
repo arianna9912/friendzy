@@ -344,6 +344,8 @@ onUnmounted(() => {
 }
 
 .cm-photos-grid {
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
