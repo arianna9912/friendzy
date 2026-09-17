@@ -3,7 +3,7 @@
     <div class="pa-ring" :class="showRing ? 'avatar-ring' : ''">
       <div class="pa-avatar" :class="[sizeClasses.avatar, 'pa-' + size]">
         <div v-if="src" class="pa-img">
-          <img :src="src" :alt="name" />
+          <img :src="src" :alt="name" draggable="false" @contextmenu.prevent @dragstart.prevent />
         </div>
         <div v-else class="pa-initials" :style="{ background: bgColor }">
           <span :class="sizeClasses.text">{{ initials }}</span>
@@ -85,6 +85,10 @@ const initials = (props.name || '?')
   width: 100%;
   height: 100%;
   object-fit: cover;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  pointer-events: none;
 }
 
 .pa-initials {

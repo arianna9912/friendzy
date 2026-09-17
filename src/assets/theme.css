@@ -153,3 +153,10 @@ button {
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
+img {
+  -webkit-user-drag: none;
+  -moz-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}

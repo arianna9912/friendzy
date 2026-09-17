@@ -20,7 +20,7 @@
         </div>
         <p v-else-if="message.text" class="mb-text">{{ message.text }}</p>
         <div v-else-if="message.image" class="mb-image">
-          <img :src="message.image" alt="Compartida" />
+          <img :src="message.image" alt="Compartida" draggable="false" @contextmenu.prevent @dragstart.prevent />
         </div>
 
         <div class="mb-meta" :class="isOwn ? 'mb-meta-own' : ''">
@@ -214,6 +214,9 @@ const onEnded = () => {
   max-width: 100%;
   max-height: 256px;
   object-fit: contain;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .mb-meta {

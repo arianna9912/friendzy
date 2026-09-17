@@ -90,6 +90,21 @@ const settingsOpen = ref(false)
 const profileOpen = ref(false)
 
 let unsubProfile = null
+let presenceTimer = null
+
+const startHeartbeat = (uid) => {
+  stopHeartbeat()
+  presenceTimer = setInterval(() => {
+    updateDoc(doc(db, 'users', uid), { lastSeen: serverTimestamp(), online: true }).catch(() => {})
+  }, 30000)
+}
+
+const stopHeartbeat = () => {
+  if (presenceTimer) {
+    clearInterval(presenceTimer)
+    presenceTimer = null
+  }
+}
 
 const handleOpen = ({ id, other }) => {
   activeConversation.value = { id, other }
@@ -120,6 +135,7 @@ onAuthStateChanged(auth, async (user) => {
   userGoogle.value = user
   authLoaded.value = true
   if (user) {
+    startHeartbeat(user.uid)
     try {
       const firstWord = (s) => (s || '').trim().split(/\s+/)[0] || ''
       const me = doc(db, 'users', user.uid)
@@ -131,13 +147,14 @@ onAuthStateChanged(auth, async (user) => {
           displayName: alias,
           email: user.email,
           photoURL: user.photoURL || '',
+          online: true,
           lastSeen: serverTimestamp(),
           createdAt: serverTimestamp(),
         })
         updateProfile(auth.currentUser, { displayName: alias }).catch(() => {})
       } else {
         const data = snap.data()
-        const updates = { lastSeen: serverTimestamp() }
+        const updates = { lastSeen: serverTimestamp(), online: true }
         const full = firstWord(user.displayName)
         if (full && data.displayName && data.displayName === (user.displayName || '') && data.displayName.includes(' ') && data.displayName !== full) {
           updates.displayName = full
@@ -156,12 +173,14 @@ onAuthStateChanged(auth, async (user) => {
       (e) => console.error('denied:me', e.code)
     )
   } else {
+    stopHeartbeat()
     unsubProfile?.()
     unsubProfile = null
   }
 })
 
 onUnmounted(() => {
+  stopHeartbeat()
   unsubProfile?.()
 })
 </script>

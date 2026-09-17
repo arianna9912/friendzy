@@ -14,8 +14,8 @@
       <div class="cm-header-info">
         <h2>{{ other.name }}</h2>
         <p>
-          <span class="cm-status-dot"></span>
-          {{ t('en_linea') }}
+          <span class="cm-status-dot" :class="{ 'cm-status-offline': !otherOnline }"></span>
+          {{ otherOnline ? t('en_linea') : t('desconectado') }}
         </p>
       </div>
 
@@ -84,7 +84,10 @@
             :key="m.id"
             :src="m.image"
             alt="Foto"
+            draggable="false"
             @click="lightbox = m.image"
+            @contextmenu.prevent
+            @dragstart.prevent
           />
         </div>
         <p v-else class="cm-photos-empty">{{ t('sin_fotos') }}</p>
@@ -92,7 +95,7 @@
     </div>
 
     <div v-if="lightbox" class="cm-lightbox" @click="lightbox = ''">
-      <img :src="lightbox" alt="Foto" />
+      <img :src="lightbox" alt="Foto" draggable="false" @contextmenu.prevent @dragstart.prevent />
     </div>
   </div>
 </template>
@@ -100,8 +103,9 @@
 <script setup>
 import { ref, watch, onUnmounted, nextTick, computed } from 'vue'
 import { db, auth } from '../firebase'
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, onSnapshot, doc } from 'firebase/firestore'
 import { t } from '../i18n'
+import { otherParticipantUid } from '../utils/chat'
 import MessageBubble from './MessageBubble.vue'
 import PremiumAvatar from './PremiumAvatar.vue'
 import FormAdd from './FormAdd.vue'
@@ -126,6 +130,9 @@ const listRef = ref(null)
 const menuOpen = ref(false)
 const photosOpen = ref(false)
 const lightbox = ref('')
+const otherOnline = ref(false)
+
+const ONLINE_WINDOW = 45000
 
 const photoList = computed(() => message.value.filter((m) => m.image))
 
@@ -145,6 +152,28 @@ const openPhotos = () => {
 }
 
 let unsub = null
+let unsubOther = null
+
+const listenOther = (id) => {
+  unsubOther?.()
+  unsubOther = null
+  otherOnline.value = false
+  if (!id) return
+  const uid = otherParticipantUid(id, auth.currentUser?.uid || '')
+  if (!uid) return
+  unsubOther = onSnapshot(
+    doc(db, 'users', uid),
+    (d) => {
+      const data = d.data() || {}
+      otherOnline.value = !!(
+        data.online &&
+        data.lastSeen &&
+        Date.now() - (data.lastSeen.toMillis?.() || 0) < ONLINE_WINDOW
+      )
+    },
+    () => {}
+  )
+}
 
 const listen = (id) => {
   if (unsub) {
@@ -164,10 +193,18 @@ const listen = (id) => {
   })
 }
 
-watch(() => props.conversationId, listen, { immediate: true })
+watch(
+  () => props.conversationId,
+  (id) => {
+    listen(id)
+    listenOther(id)
+  },
+  { immediate: true }
+)
 
 onUnmounted(() => {
   unsub?.()
+  unsubOther?.()
 })
 </script>
 
@@ -243,6 +280,10 @@ onUnmounted(() => {
   border-radius: 50%;
   background: #10b981;
   display: inline-block;
+}
+
+.cm-status-offline {
+  background: rgba(142, 142, 142, 0.6);
 }
 
 .cm-header-actions {
@@ -362,6 +403,9 @@ onUnmounted(() => {
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.15s ease;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .cm-photos-grid img:hover {

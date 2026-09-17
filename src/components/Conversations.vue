@@ -62,10 +62,9 @@
           class="sb-user-item"
           @click="onUserClick(u)"
         >
-          <PremiumAvatar :src="u.photoURL || ''" :name="u.displayName" size="md" :online="true" />
+          <PremiumAvatar :src="u.photoURL || ''" :name="u.displayName" size="md" :online="isOnline(u)" />
           <div class="sb-user-body">
             <span class="sb-user-name">{{ u.displayName }}</span>
-            <span class="sb-user-email">{{ u.email }}</span>
           </div>
           <span
             v-if="statusOf(u) !== 'friend'"
@@ -102,7 +101,7 @@
             :src="userOf(r.from)?.photoURL || ''"
             :name="userOf(r.from)?.displayName || r.from"
             size="lg"
-            online
+            :online="!!userOf(r.from) && isOnline(userOf(r.from))"
           />
           <div class="conv-body">
             <div class="conv-top">
@@ -138,13 +137,13 @@
           class="conv-item friend-item"
           @click="startWith(u)"
         >
-          <PremiumAvatar :src="u.photoURL || ''" :name="u.displayName" size="lg" online />
+          <PremiumAvatar :src="u.photoURL || ''" :name="u.displayName" size="lg" :online="isOnline(u)" />
           <div class="conv-body">
             <div class="conv-top">
               <span class="conv-name">{{ u.displayName }}</span>
             </div>
             <div class="conv-bottom">
-              <span class="conv-preview">{{ t('en_linea') }}</span>
+              <span class="conv-preview">{{ isOnline(u) ? t('en_linea') : t('desconectado') }}</span>
             </div>
           </div>
           <button class="friend-remove" @click.stop="unfriend(u)">
@@ -171,7 +170,7 @@
           :class="{ active: c.id === activeId }"
           @click="openConversation(c)"
         >
-          <PremiumAvatar :name="otherName(c)" size="lg" online />
+          <PremiumAvatar :name="otherName(c)" size="lg" :online="isOtherOnline(c)" />
           <div class="conv-body">
             <div class="conv-top">
               <span class="conv-name">{{ otherName(c) }}</span>
@@ -507,10 +506,19 @@ const unfriend = async (u) => {
 }
 
 const otherName = (c) => {
-  const uid = otherParticipantUid(c.id, currentUser.uid)
-  const u = users.value.find((x) => x.uid === uid)
-  return u ? u.displayName : uid
+  const u = otherUser(c)
+  return u ? u.displayName : otherParticipantUid(c.id, currentUser.uid)
 }
+
+const ONLINE_WINDOW = 45000
+
+const isOnline = (u) =>
+  !!(u && u.online && u.lastSeen && Date.now() - (u.lastSeen.toMillis?.() || 0) < ONLINE_WINDOW)
+
+const otherUser = (c) =>
+  users.value.find((x) => x.uid === otherParticipantUid(c.id, currentUser.uid))
+
+const isOtherOnline = (c) => isOnline(otherUser(c))
 
 const lastPreview = (c) => (c.lastMessage ? c.lastMessage : t('sin_mensajes'))
 
@@ -524,11 +532,7 @@ const filteredConversations = computed(() => {
 const searchUsers = computed(() => {
   let list = users.value
   if (q.value) {
-    list = list.filter(
-      (u) =>
-        (u.displayName || '').toLowerCase().includes(q.value) ||
-        (u.email || '').toLowerCase().includes(q.value)
-    )
+    list = list.filter((u) => (u.displayName || '').toLowerCase().includes(q.value))
   }
   return list
 })
@@ -574,6 +578,7 @@ const startWith = async (u) => {
 
 const logout = async () => {
   try {
+    await updateDoc(doc(db, 'users', currentUser.uid), { online: false }).catch(() => {})
     await signOut(auth)
   } catch (error) {
     console.log(error)
