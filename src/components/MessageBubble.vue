@@ -21,6 +21,37 @@
         <p v-else-if="message.text" class="mb-text">{{ message.text }}</p>
         <div v-else-if="message.image" class="mb-image">
           <img :src="message.image" alt="Compartida" draggable="false" @contextmenu.prevent @dragstart.prevent />
+          <button
+            v-if="conversationId"
+            class="mb-react-btn"
+            :title="t('reaccionar')"
+            @click.stop="pickerOpen = !pickerOpen"
+          >
+            <i class="mdi mdi-emoticon-plus-outline"></i>
+          </button>
+          <div v-if="pickerOpen" class="mb-react-picker" @click.stop>
+            <button
+              v-for="e in EMOJIS"
+              :key="e"
+              class="mb-react-opt"
+              @click="toggleReaction(e)"
+            >
+              {{ e }}
+            </button>
+          </div>
+        </div>
+
+        <div v-if="reactionList.length" class="mb-reactions" :class="isOwn ? 'mb-reactions-own' : ''">
+          <button
+            v-for="r in reactionList"
+            :key="r.emoji"
+            class="mb-react-chip"
+            :class="{ mine: r.mine }"
+            @click="toggleReaction(r.emoji)"
+          >
+            <span class="mb-react-emoji">{{ r.emoji }}</span>
+            <span v-if="r.count > 1" class="mb-react-count">{{ r.count }}</span>
+          </button>
         </div>
 
         <div class="mb-meta" :class="isOwn ? 'mb-meta-own' : ''">
@@ -34,6 +65,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore'
+import { db, auth } from '../firebase'
+import { t } from '../i18n'
 import PremiumAvatar from './PremiumAvatar.vue'
 
 const props = defineProps({
@@ -42,11 +76,48 @@ const props = defineProps({
   showAvatar: { type: Boolean, default: true },
   avatar: { type: String, default: '' },
   senderName: { type: String, default: '' },
+  conversationId: { type: String, default: '' },
 })
+
+const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥']
 
 const audioRef = ref(null)
 const playing = ref(false)
 const progress = ref(0)
+const pickerOpen = ref(false)
+
+const myUid = computed(() => auth.currentUser?.uid || '')
+
+const reactionList = computed(() => {
+  const map = props.message.reactions || {}
+  return Object.entries(map)
+    .map(([emoji, uids]) => ({
+      emoji,
+      uidList: Array.isArray(uids) ? uids : [],
+    }))
+    .filter((r) => r.uidList.length > 0)
+    .map((r) => ({
+      emoji: r.emoji,
+      count: r.uidList.length,
+      mine: r.uidList.includes(myUid.value),
+    }))
+})
+
+const toggleReaction = async (emoji) => {
+  pickerOpen.value = false
+  const uid = myUid.value
+  if (!uid || !props.conversationId || !props.message.id) return
+  const current = props.message.reactions?.[emoji] || []
+  const has = Array.isArray(current) && current.includes(uid)
+  try {
+    await updateDoc(
+      doc(db, 'conversations', props.conversationId, 'messages', props.message.id),
+      { [`reactions.${emoji}`]: has ? arrayRemove(uid) : arrayUnion(uid) }
+    )
+  } catch (error) {
+    console.log('reaction', error)
+  }
+}
 
 const timeLabel = computed(() => {
   const seconds = props.message.time?.seconds ?? 0
@@ -204,8 +275,8 @@ const onEnded = () => {
 }
 
 .mb-image {
+  position: relative;
   border-radius: 8px;
-  overflow: hidden;
   margin: -4px;
 }
 
@@ -214,9 +285,111 @@ const onEnded = () => {
   max-width: 100%;
   max-height: 256px;
   object-fit: contain;
+  border-radius: 8px;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
   user-select: none;
+}
+
+.mb-react-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.mb-react-btn:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.mb-react-btn .mdi {
+  font-size: 16px;
+}
+
+.mb-react-picker {
+  position: absolute;
+  top: 40px;
+  right: 6px;
+  z-index: 6;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  animation: scale-in 0.12s ease-out;
+}
+
+.mb-react-opt {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.mb-react-opt:hover {
+  transform: scale(1.2);
+  background: var(--secondary);
+}
+
+.mb-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.mb-reactions-own {
+  justify-content: flex-end;
+}
+
+.mb-react-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--secondary);
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.15s ease;
+}
+
+.mb-react-chip:hover {
+  transform: translateY(-1px);
+}
+
+.mb-react-chip.mine {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.mb-react-emoji {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.mb-react-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted-foreground);
 }
 
 .mb-meta {

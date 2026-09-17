@@ -63,6 +63,7 @@
         :show-avatar="index === 0 || message[index - 1]?.uid !== item.uid"
         :avatar="item.uid === userChat.uid ? userPhoto : other.photo"
         :sender-name="item.uid === userChat.uid ? userChat.displayName : other.name"
+        :conversation-id="conversationId"
       />
     </div>
 

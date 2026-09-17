@@ -153,37 +153,6 @@
       </div>
     </template>
 
-    <!-- Favoritos -->
-    <template v-if="favoriteConvs.length">
-      <div class="sb-section">
-        <div class="sb-label">
-          <i class="mdi mdi-star"></i>
-          <span>{{ t('favoritos') }}</span>
-        </div>
-        <span class="sb-count">{{ favoriteConvs.length }}</span>
-      </div>
-      <div class="sb-list">
-        <button
-          v-for="c in favoriteConvs"
-          :key="c.id"
-          class="conv-item"
-          :class="{ active: c.id === activeId }"
-          @click="openConversation(c)"
-        >
-          <PremiumAvatar :name="otherName(c)" size="lg" :online="isOtherOnline(c)" />
-          <div class="conv-body">
-            <div class="conv-top">
-              <span class="conv-name">{{ otherName(c) }}</span>
-              <i class="mdi mdi-star conv-star"></i>
-            </div>
-            <div class="conv-bottom">
-              <span class="conv-preview">{{ lastPreview(c) }}</span>
-            </div>
-          </div>
-        </button>
-      </div>
-    </template>
-
     <!-- Conversaciones -->
     <div class="sb-section">
       <div class="sb-label">
@@ -408,8 +377,6 @@ const openSettings = () => {
 }
 
 const isFav = (id) => props.favorites.includes(id)
-
-const favoriteConvs = computed(() => conversations.value.filter((c) => isFav(c.id)))
 
 const mergeAccepted = () => {
   acceptedReq.value = [...acceptedIn.value, ...acceptedOut.value]
