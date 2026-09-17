@@ -10,6 +10,46 @@
 
     <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="handleImages" />
 
+    <!-- Photo picker (max 3) -->
+    <div v-if="photoPickerOpen" class="ci-modal" @click.self="closePicker">
+      <div class="ci-picker">
+        <div class="ci-picker-head">
+          <h4>{{ t('elige_fotos') }}</h4>
+          <span class="ci-picker-count" :class="{ full: selCount === MAX_FOTOS }">
+            {{ selCount }}/{{ MAX_FOTOS }}
+          </span>
+          <button class="icon-btn" @click="closePicker">
+            <i class="mdi mdi-close"></i>
+          </button>
+        </div>
+        <p class="ci-picker-hint">{{ t('max_3_fotos') }}</p>
+        <div class="ci-picker-grid">
+          <div
+            v-for="(p, i) in photoFiles"
+            :key="p.id"
+            class="ci-picker-item"
+            :class="{ selected: p.selected, dimmed: !p.selected && selCount === MAX_FOTOS }"
+            @click="togglePhoto(i)"
+          >
+            <img :src="p.preview" alt="Foto" />
+            <span v-if="p.selected" class="ci-picker-check">
+              <i class="mdi mdi-check"></i>
+            </span>
+            <span v-else class="ci-picker-num">{{ i + 1 }}</span>
+          </div>
+        </div>
+        <div class="ci-picker-foot">
+          <button
+            class="btn-primary ci-picker-send"
+            :disabled="selCount === 0"
+            @click="sendSelected"
+          >
+            {{ t('enviar_fotos') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="ci-row">
       <button
         class="ci-round-btn"
@@ -57,10 +97,6 @@
     <div v-if="voiceNotice" class="ci-recording">
       <span class="ci-rec-text">{{ voiceNotice }}</span>
     </div>
-    <!-- Photo notice -->
-    <div v-if="photoNotice" class="ci-recording">
-      <span class="ci-rec-text">{{ photoNotice }}</span>
-    </div>
   </div>
 </template>
 
@@ -80,12 +116,15 @@ const attachOpen = ref(false)
 const isRecording = ref(false)
 const recTime = ref(0)
 const voiceNotice = ref('')
-const photoNotice = ref('')
+const photoFiles = ref([])
+const photoPickerOpen = ref(false)
 const taRef = ref(null)
 const fileInput = ref(null)
 
 const MAX_REC_MS = 30000
 const MAX_FOTOS = 3
+
+const selCount = computed(() => photoFiles.value.filter((p) => p.selected).length)
 
 const recLabel = computed(() => {
   const s = Math.floor(recTime.value / 1000)
@@ -153,14 +192,42 @@ const handleImages = async (e) => {
   if (!files.length || !props.conversationId) return
 
   if (files.length > MAX_FOTOS) {
-    photoNotice.value = t('max_3_fotos')
-    setTimeout(() => {
-      photoNotice.value = ''
-    }, 4000)
+    photoFiles.value = files.map((f, i) => ({
+      id: i,
+      file: f,
+      preview: URL.createObjectURL(f),
+      selected: i < MAX_FOTOS,
+    }))
+    photoPickerOpen.value = true
+    return
   }
 
-  for (const file of files.slice(0, MAX_FOTOS)) {
+  for (const file of files) {
     await sendImage(file)
+  }
+}
+
+const togglePhoto = (i) => {
+  const p = photoFiles.value[i]
+  if (!p) return
+  if (p.selected) {
+    p.selected = false
+  } else if (selCount.value < MAX_FOTOS) {
+    p.selected = true
+  }
+}
+
+const closePicker = () => {
+  photoFiles.value.forEach((p) => URL.revokeObjectURL(p.preview))
+  photoFiles.value = []
+  photoPickerOpen.value = false
+}
+
+const sendSelected = async () => {
+  const sel = photoFiles.value.filter((p) => p.selected)
+  closePicker()
+  for (const p of sel) {
+    await sendImage(p.file)
   }
 }
 
@@ -512,5 +579,135 @@ onUnmounted(() => {
   font-size: 14px;
   color: var(--muted-foreground);
   font-family: 'Courier New', monospace;
+}
+
+.ci-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.ci-picker {
+  width: 100%;
+  max-width: 460px;
+  max-height: 85vh;
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  animation: scale-in 0.2s ease-out;
+}
+
+.ci-picker-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ci-picker-head h4 {
+  margin: 0 auto 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.ci-picker-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.ci-picker-count.full {
+  color: var(--primary);
+}
+
+.ci-picker-hint {
+  margin: 8px 0 12px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.ci-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  overflow-y: auto;
+  padding-bottom: 4px;
+}
+
+.ci-picker-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.ci-picker-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ci-picker-item.selected {
+  border-color: var(--primary);
+}
+
+.ci-picker-item.dimmed {
+  opacity: 0.45;
+}
+
+.ci-picker-check,
+.ci-picker-num {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--primary);
+}
+
+.ci-picker-num {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.ci-picker-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.ci-picker-send {
+  height: 42px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ci-picker-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
