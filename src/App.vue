@@ -46,8 +46,8 @@
       @toggle-favorite="toggleFavorite"
     />
     <div v-else class="app-placeholder">
-      <button class="app-placeholder-btn" @click="mobileOpen = true">
-        <i class="mdi mdi-account-plus-outline"></i>
+      <button class="app-placeholder-icon" @click="mobileOpen = true">
+        <i class="mdi mdi-chat-processing-outline"></i>
       </button>
       <p>{{ t('selecciona') }}</p>
       <p class="app-placeholder-sub">{{ t('para_chatear') }}</p>
@@ -239,11 +239,6 @@ onUnmounted(() => {
   color: var(--muted-foreground);
 }
 
-.app-placeholder .mdi {
-  font-size: 72px;
-  color: var(--primary);
-}
-
 .app-placeholder p {
   font-size: 15px;
   font-weight: 500;
@@ -255,23 +250,27 @@ onUnmounted(() => {
   margin: 4px 0 0;
 }
 
-.app-placeholder-btn {
+.app-placeholder-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: 88px;
+  height: 88px;
   border: none;
-  border-radius: 16px;
-  background: var(--primary);
-  color: #fff;
-  font-size: 24px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
   cursor: pointer;
-  box-shadow: 0 4px 14px var(--shadow-primary);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
-.app-placeholder-btn:hover {
-  opacity: 0.9;
+.app-placeholder-icon .mdi {
+  font-size: 42px;
+  color: var(--primary);
+}
+
+.app-placeholder-icon:hover {
+  transform: scale(1.05);
   box-shadow: 0 6px 18px var(--shadow-primary);
 }
 
