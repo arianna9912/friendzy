@@ -68,7 +68,7 @@
             </div>
             <div class="field">
               <label>{{ t('email') }}</label>
-              <input v-model="email" type="email" placeholder="tu@email.com" />
+              <input v-model="email" type="email" placeholder="ejemplo@gmail.com" />
             </div>
             <div class="field">
               <label>{{ t('contrasena') }}</label>
