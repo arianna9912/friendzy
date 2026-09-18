@@ -395,27 +395,20 @@ const onEnded = () => {
 .mb-react-chip {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px 7px;
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  background: var(--card);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
   cursor: pointer;
-  transition: transform 0.1s ease, border-color 0.15s ease;
+  transition: transform 0.1s ease;
 }
 
 .mb-react-chip:hover {
-  transform: translateY(-1px);
-}
-
-.mb-react-chip.mine {
-  background: var(--primary-soft);
-  border-color: var(--primary);
+  transform: scale(1.15);
 }
 
 .mb-react-emoji {
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1;
 }
 
@@ -423,6 +416,7 @@ const onEnded = () => {
   font-size: 11px;
   font-weight: 600;
   color: var(--muted-foreground);
+  margin-left: -1px;
 }
 
 .mb-meta {
