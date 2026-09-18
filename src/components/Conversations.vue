@@ -477,7 +477,7 @@ const otherName = (c) => {
   return u ? u.displayName : otherParticipantUid(c.id, currentUser.uid)
 }
 
-const ONLINE_WINDOW = 45000
+const ONLINE_WINDOW = 30000
 
 const isOnline = (u) =>
   !!(u && u.online && u.lastSeen && Date.now() - (u.lastSeen.toMillis?.() || 0) < ONLINE_WINDOW)

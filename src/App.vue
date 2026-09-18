@@ -96,7 +96,7 @@ const startHeartbeat = (uid) => {
   stopHeartbeat()
   presenceTimer = setInterval(() => {
     updateDoc(doc(db, 'users', uid), { lastSeen: serverTimestamp(), online: true }).catch(() => {})
-  }, 30000)
+  }, 15000)
 }
 
 const stopHeartbeat = () => {

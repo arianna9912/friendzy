@@ -133,7 +133,7 @@ const photosOpen = ref(false)
 const lightbox = ref('')
 const otherOnline = ref(false)
 
-const ONLINE_WINDOW = 45000
+const ONLINE_WINDOW = 30000
 
 const photoList = computed(() => message.value.filter((m) => m.image))
 

@@ -21,24 +21,6 @@
         <p v-else-if="message.text" class="mb-text">{{ message.text }}</p>
         <div v-else-if="message.image" class="mb-image">
           <img :src="message.image" alt="Compartida" draggable="false" @contextmenu.prevent @dragstart.prevent />
-          <button
-            v-if="conversationId"
-            class="mb-react-btn"
-            :title="t('reaccionar')"
-            @click.stop="pickerOpen = !pickerOpen"
-          >
-            <i class="mdi mdi-emoticon-plus-outline"></i>
-          </button>
-          <div v-if="pickerOpen" class="mb-react-picker" @click.stop>
-            <button
-              v-for="e in EMOJIS"
-              :key="e"
-              class="mb-react-opt"
-              @click="toggleReaction(e)"
-            >
-              {{ e }}
-            </button>
-          </div>
         </div>
 
         <div v-if="reactionList.length" class="mb-reactions" :class="isOwn ? 'mb-reactions-own' : ''">
@@ -55,8 +37,28 @@
         </div>
 
         <div class="mb-meta" :class="isOwn ? 'mb-meta-own' : ''">
+          <button
+            v-if="conversationId"
+            class="mb-react-trigger"
+            :class="{ active: pickerOpen }"
+            :title="t('reaccionar')"
+            @click.stop="pickerOpen = !pickerOpen"
+          >
+            <i class="mdi mdi-emoticon-plus-outline"></i>
+          </button>
           <span>{{ timeLabel }}</span>
           <i v-if="isOwn" class="mdi mdi-check-all mb-check"></i>
+        </div>
+
+        <div v-if="pickerOpen" class="mb-react-picker" :class="isOwn ? 'mb-picker-own' : ''" @click.stop>
+          <button
+            v-for="e in EMOJIS"
+            :key="e"
+            class="mb-react-opt"
+            @click="toggleReaction(e)"
+          >
+            {{ e }}
+          </button>
         </div>
       </div>
     </div>
@@ -291,37 +293,45 @@ const onEnded = () => {
   user-select: none;
 }
 
-.mb-react-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
+.mb-react-trigger {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 22px;
+  height: 22px;
   border: none;
   border-radius: 9999px;
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
+  background: transparent;
+  color: var(--muted-foreground);
   cursor: pointer;
-  opacity: 0.75;
+  flex-shrink: 0;
+  opacity: 0.55;
   transition: opacity 0.15s ease, background 0.15s ease;
 }
 
-.mb-react-btn:hover {
+.mb-react-trigger:hover,
+.mb-react-trigger.active {
   opacity: 1;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--secondary);
 }
 
-.mb-react-btn .mdi {
-  font-size: 16px;
+.mb-react-trigger .mdi {
+  font-size: 14px;
+}
+
+.mb-bubble-own .mb-react-trigger {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.mb-bubble-own .mb-react-trigger:hover,
+.mb-bubble-own .mb-react-trigger.active {
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .mb-react-picker {
   position: absolute;
-  top: 40px;
-  right: 6px;
+  bottom: calc(100% + 6px);
+  right: 4px;
   z-index: 6;
   display: flex;
   gap: 2px;
