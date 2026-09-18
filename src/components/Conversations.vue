@@ -170,7 +170,7 @@
         :class="{ active: c.id === activeId }"
         @click="openConversation(c)"
       >
-        <PremiumAvatar :name="otherName(c)" size="lg" online />
+        <PremiumAvatar :name="otherName(c)" size="lg" :online="isOtherOnline(c)" />
         <div class="conv-body">
           <div class="conv-top">
             <span class="conv-name">{{ otherName(c) }}</span>
