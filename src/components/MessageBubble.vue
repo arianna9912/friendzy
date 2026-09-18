@@ -1,14 +1,18 @@
 <template>
-  <div class="mb-row" :class="isOwn ? 'mb-own' : 'mb-other'">
+  <div class="mb-row" ref="rowRef" :class="isOwn ? 'mb-own' : 'mb-other'">
     <div class="mb-avatar" :class="!showAvatar ? 'mb-avatar-hidden' : ''">
       <PremiumAvatar :src="avatar || ''" :name="senderName" size="sm" />
     </div>
 
     <div class="mb-max">
-      <div class="mb-bubble" :class="isOwn ? 'mb-bubble-own' : 'mb-bubble-other'">
+      <div
+        class="mb-bubble"
+        :class="isOwn ? 'mb-bubble-own' : 'mb-bubble-other'"
+        @click="togglePicker"
+      >
         <div v-if="message.audio" class="mb-audio">
           <div class="mb-audio-head">
-            <button class="mb-audio-play" @click="togglePlay">
+            <button class="mb-audio-play" @click.stop="togglePlay">
               <i :class="['mdi', playing ? 'mdi-pause' : 'mdi-play']"></i>
             </button>
             <div class="mb-audio-track">
@@ -29,7 +33,7 @@
             :key="r.emoji"
             class="mb-react-chip"
             :class="{ mine: r.mine }"
-            @click="toggleReaction(r.emoji)"
+            @click.stop="toggleReaction(r.emoji)"
           >
             <span class="mb-react-emoji">{{ r.emoji }}</span>
             <span v-if="r.count > 1" class="mb-react-count">{{ r.count }}</span>
@@ -66,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore'
 import { db, auth } from '../firebase'
 import { t } from '../i18n'
@@ -87,8 +91,23 @@ const audioRef = ref(null)
 const playing = ref(false)
 const progress = ref(0)
 const pickerOpen = ref(false)
+const rowRef = ref(null)
 
 const myUid = computed(() => auth.currentUser?.uid || '')
+
+const onDocClick = (e) => {
+  if (pickerOpen.value && rowRef.value && !rowRef.value.contains(e.target)) {
+    pickerOpen.value = false
+  }
+}
+
+onMounted(() => document.addEventListener('click', onDocClick))
+onUnmounted(() => document.removeEventListener('click', onDocClick))
+
+const togglePicker = () => {
+  if (!props.conversationId) return
+  pickerOpen.value = !pickerOpen.value
+}
 
 const reactionList = computed(() => {
   const map = props.message.reactions || {}
