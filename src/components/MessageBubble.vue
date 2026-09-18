@@ -27,19 +27,6 @@
           <img :src="message.image" alt="Compartida" draggable="false" @contextmenu.prevent @dragstart.prevent />
         </div>
 
-        <div v-if="reactionList.length" class="mb-reactions" :class="isOwn ? 'mb-reactions-own' : ''">
-          <button
-            v-for="r in reactionList"
-            :key="r.emoji"
-            class="mb-react-chip"
-            :class="{ mine: r.mine }"
-            @click.stop="toggleReaction(r.emoji)"
-          >
-            <span class="mb-react-emoji">{{ r.emoji }}</span>
-            <span v-if="r.count > 1" class="mb-react-count">{{ r.count }}</span>
-          </button>
-        </div>
-
         <div class="mb-meta" :class="isOwn ? 'mb-meta-own' : ''">
           <button
             v-if="conversationId"
@@ -64,6 +51,19 @@
             {{ e }}
           </button>
         </div>
+      </div>
+
+      <div v-if="reactionList.length" class="mb-reactions" :class="isOwn ? 'mb-reactions-own' : ''">
+        <button
+          v-for="r in reactionList"
+          :key="r.emoji"
+          class="mb-react-chip"
+          :class="{ mine: r.mine }"
+          @click="toggleReaction(r.emoji)"
+        >
+          <span class="mb-react-emoji">{{ r.emoji }}</span>
+          <span v-if="r.count > 1" class="mb-react-count">{{ r.count }}</span>
+        </button>
       </div>
     </div>
   </div>
@@ -379,10 +379,13 @@ const onEnded = () => {
 }
 
 .mb-reactions {
+  position: relative;
+  z-index: 3;
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  margin-top: 6px;
+  margin-top: -8px;
+  padding: 0 16px;
 }
 
 .mb-reactions-own {
@@ -396,7 +399,8 @@ const onEnded = () => {
   padding: 2px 7px;
   border: 1px solid var(--border);
   border-radius: 9999px;
-  background: var(--secondary);
+  background: var(--card);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   transition: transform 0.1s ease, border-color 0.15s ease;
 }
