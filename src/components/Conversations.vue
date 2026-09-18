@@ -205,6 +205,7 @@ import {
 } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
 import { getConversationId, otherParticipantUid } from '../utils/chat'
+import { stopPresence } from '../utils/presence'
 import { notify, beep, ensurePermission } from '../utils/notify'
 import { t } from '../i18n'
 import Logo from './Logo.vue'
@@ -477,7 +478,7 @@ const otherName = (c) => {
   return u ? u.displayName : otherParticipantUid(c.id, currentUser.uid)
 }
 
-const ONLINE_WINDOW = 30000
+const ONLINE_WINDOW = 25000
 
 const isOnline = (u) =>
   !!(u && u.online && u.lastSeen && Date.now() - (u.lastSeen.toMillis?.() || 0) < ONLINE_WINDOW)
@@ -545,7 +546,7 @@ const startWith = async (u) => {
 
 const logout = async () => {
   try {
-    await updateDoc(doc(db, 'users', currentUser.uid), { online: false }).catch(() => {})
+    await stopPresence(true)
     await signOut(auth)
   } catch (error) {
     console.log(error)

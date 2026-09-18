@@ -72,6 +72,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 import { auth, db } from './firebase'
+import { startPresence, stopPresence } from './utils/presence'
 import { t, applyTheme } from './i18n'
 import AuthScreen from './components/AuthScreen.vue'
 import Conversations from './components/Conversations.vue'
@@ -80,6 +81,9 @@ import SettingsPanel from './components/SettingsPanel.vue'
 import ProfileModal from './components/ProfileModal.vue'
 
 applyTheme()
+
+const onPageHide = () => stopPresence(true)
+if (typeof window !== 'undefined') window.addEventListener('pagehide', onPageHide)
 
 const userGoogle = ref(null)
 const authLoaded = ref(false)
@@ -90,21 +94,6 @@ const settingsOpen = ref(false)
 const profileOpen = ref(false)
 
 let unsubProfile = null
-let presenceTimer = null
-
-const startHeartbeat = (uid) => {
-  stopHeartbeat()
-  presenceTimer = setInterval(() => {
-    updateDoc(doc(db, 'users', uid), { lastSeen: serverTimestamp(), online: true }).catch(() => {})
-  }, 15000)
-}
-
-const stopHeartbeat = () => {
-  if (presenceTimer) {
-    clearInterval(presenceTimer)
-    presenceTimer = null
-  }
-}
 
 const handleOpen = ({ id, other }) => {
   activeConversation.value = { id, other }
@@ -135,7 +124,7 @@ onAuthStateChanged(auth, async (user) => {
   userGoogle.value = user
   authLoaded.value = true
   if (user) {
-    startHeartbeat(user.uid)
+    startPresence(user.uid)
     try {
       const firstWord = (s) => (s || '').trim().split(/\s+/)[0] || ''
       const me = doc(db, 'users', user.uid)
@@ -173,14 +162,15 @@ onAuthStateChanged(auth, async (user) => {
       (e) => console.error('denied:me', e.code)
     )
   } else {
-    stopHeartbeat()
+    stopPresence(false)
     unsubProfile?.()
     unsubProfile = null
   }
 })
 
 onUnmounted(() => {
-  stopHeartbeat()
+  if (typeof window !== 'undefined') window.removeEventListener('pagehide', onPageHide)
+  stopPresence(false)
   unsubProfile?.()
 })
 </script>
