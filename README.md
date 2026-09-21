@@ -1,36 +1,47 @@
-# Friendzy 
+# Friendzy
 
-Chat, construido con **Vue 3**, **Vite** y **Firebase (Auth + Firestore)**.
+Chat privado en tiempo real entre dos usuarios. Disponible en: https://arianna9912.github.io/friendzy/
+
+## Tecnología
+
+- **Vue 3 + Vite + Vuetify 3** (SPA)
+- **Firebase**:
+  - **Authentication**: el acceso solo es posible iniciando sesión con tu cuenta de **Google** o creándote una cuenta propia con correo y contraseña
+  - **Cloud Firestore**: chat en tiempo real (`onSnapshot`), mensajes, conversaciones, solicitudes de amistad, favoritos, presencia en línea/desconectado y reacciones
+  - **Cloud Storage**: imágenes y fotos compartidas
+- **i18n**: interfaz en **español e inglés**
+- **Cambio de temática de colores**: naranja / azul
+- **Hosting**: GitHub Pages
 
 ## Funcionalidades
 
-- Pantalla de login/landing (panel naranja con gradiente + panel blanco con card de login)
-- Inicio de sesión con **Google** o con **email y contraseña** (+ registro)
-- Chat **privado** entre dos usuarios (mensajes 1-a-1, no es un chat grupal)
-- Sidebar con perfil, buscador de conversaciones y selector de usuarios (nuevo chat)
-- Burbujas de mensaje con avatares e indicador de estado, hora y visto
-- Envío de mensajes de texto o **imágenes**
-- Registro automático de cada usuario que inicia sesión
-- Datos en tiempo real (Firestore `onSnapshot`)
+- Envío de **mensajes de texto**
+- Envío de **notas de voz** (audio) grabadas en el momento
+- Fotos compartidas (individuales o varias a la vez)
+- **Reacciones con emojis** a cualquier mensaje (haz clic en la burbuja del mensaje)
+- Estado **En línea / Desconectado** en tiempo real por usuario
+- Solicitudes de amistad, lista de amigos y conversaciones favoritas (estrella)
+- Indicadores de hora y de mensaje visto (doble check)
 
 ## Requisito de Firebase
 
-En **Firebase Console → Authentication → Sign-in method**, asegúrate de tener habilitados:
+En **Firebase Console -> Authentication -> Sign-in method** deben estar habilitados:
 
 - **Google**
-- **Email/Password** (necesario para el login con email)
+- **Email/Password** (necesario para crear cuenta propia y el login con email)
 
 Flujo de amistad:
-1. Todos los usuarios registrados aparecen en el botón `+` (o con el buscador).
+1. Los usuarios registrados aparecen en el botón `+` o con el buscador.
 2. Con el botón **Solicitar** se envía una solicitud de chat (doc en `requests/`).
 3. El destinatario la ve en la sección **Solicitudes** y la **Acepta** o la **Rechaza**.
-4. Al aceptar, la otra persona pasa a la lista de **Amigos** y se abre la conversación
-   (el documento de la conversación se crea automáticamente al abrirla, aunque aún
-   no haya mensajes, y aparece en la lista **Conversaciones**).
+4. Al aceptar, la otra persona pasa a **Amigos** y se abre la conversación
+   (el documento de la conversación se crea automáticamente al abrirla y aparece
+   en la lista **Conversaciones**).
 
-## Stack
+## Desarrollo
 
-- Vue 3
-- Vuetify 3 (tema blanco + naranja)
-- Vite
-- Firebase (Auth + Firestore)
+```bash
+npm install
+npm run dev      # entorno local
+npm run build    # compilar a dist/
+```
