@@ -118,6 +118,17 @@
             <span>{{ t('badge_global') }}</span>
           </div>
         </div>
+
+        <a
+          class="auth-credit"
+          href="https://github.com/arianna9912"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span>{{ t('desarrollado_por') }}</span>
+          <strong>arianna9912</strong>
+          <i class="mdi mdi-github"></i>
+        </a>
       </div>
     </section>
   </main>
@@ -578,6 +589,37 @@ const submit = async () => {
   margin-top: 32px;
   opacity: 0;
   animation: fade-in 0.5s ease-out 0.5s both;
+}
+
+.auth-credit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  opacity: 0;
+  animation: fade-in 0.5s ease-out 0.5s both;
+  transition: color 0.15s ease;
+}
+
+.auth-credit:hover {
+  color: var(--primary);
+}
+
+.auth-credit strong {
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.auth-credit:hover strong {
+  color: var(--primary);
+}
+
+.auth-credit .mdi {
+  font-size: 14px;
 }
 
 .auth-badge {
