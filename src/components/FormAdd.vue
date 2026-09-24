@@ -8,6 +8,14 @@
       </button>
     </div>
 
+    <!-- Emoji picker -->
+    <div v-if="emojiOpen" class="ci-backdrop" @click="emojiOpen = false"></div>
+    <div v-if="emojiOpen" class="ci-emoji-panel">
+      <button v-for="e in EMOJIS" :key="e" class="ci-emoji-opt" @click="insertEmoji(e)">
+        {{ e }}
+      </button>
+    </div>
+
     <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="handleImages" />
 
     <!-- Photo picker (max 3) -->
@@ -54,7 +62,7 @@
       <button
         class="ci-round-btn"
         :class="{ active: attachOpen }"
-        @click="attachOpen = !attachOpen"
+        @click="toggleAttach"
       >
         <i :class="['mdi', attachOpen ? 'mdi-close' : 'mdi-paperclip']"></i>
       </button>
@@ -69,7 +77,7 @@
           @input="autosize"
           @keydown.enter.exact.prevent="send"
         ></textarea>
-        <button class="ci-round-btn ci-smile">
+        <button class="ci-round-btn ci-smile" :class="{ active: emojiOpen }" @click="toggleEmojiPicker">
           <i class="mdi mdi-emoticon-outline"></i>
         </button>
       </div>
@@ -113,6 +121,7 @@ const props = defineProps({
 
 const message = ref('')
 const attachOpen = ref(false)
+const emojiOpen = ref(false)
 const isRecording = ref(false)
 const recTime = ref(0)
 const voiceNotice = ref('')
@@ -123,6 +132,51 @@ const fileInput = ref(null)
 
 const MAX_REC_MS = 30000
 const MAX_FOTOS = 3
+
+const EMOJIS = [
+  '😀',
+  '😂',
+  '😅',
+  '😍',
+  '🥰',
+  '😘',
+  '😊',
+  '😎',
+  '🤔',
+  '😢',
+  '😭',
+  '😉',
+  '🤗',
+  '😊',
+  '🙂',
+  '😴',
+  '👍',
+  '👎',
+  '👏',
+  '🙏',
+  '💪',
+  '✌️',
+  '🤝',
+  '👌',
+  '💖',
+  '❤️',
+  '💯',
+  '🔥',
+  '✨',
+  '⭐',
+  '🎉',
+  '🎂',
+  '🌹',
+  '🌞',
+  '🌙',
+  '☕',
+  '🍕',
+  '🍩',
+  '⚽',
+  '🎵',
+  '💬',
+  '✅',
+]
 
 const selCount = computed(() => photoFiles.value.filter((p) => p.selected).length)
 
@@ -145,6 +199,25 @@ const autosize = () => {
   if (!ta) return
   ta.style.height = 'auto'
   ta.style.height = `${Math.min(ta.scrollHeight, 128)}px`
+}
+
+const toggleAttach = () => {
+  attachOpen.value = !attachOpen.value
+  if (attachOpen.value) emojiOpen.value = false
+}
+
+const toggleEmojiPicker = () => {
+  if (isRecording.value) return
+  emojiOpen.value = !emojiOpen.value
+  if (emojiOpen.value) attachOpen.value = false
+}
+
+const insertEmoji = (e) => {
+  message.value += e
+  nextTick(() => {
+    autosize()
+    taRef.value?.focus()
+  })
 }
 
 const send = async () => {
@@ -452,6 +525,41 @@ onUnmounted(() => {
 
 .ci-attach-btn .mdi {
   font-size: 20px;
+}
+
+.ci-emoji-panel {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 16px;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  padding: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: fade-in 0.15s ease-out;
+}
+
+.ci-emoji-opt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.ci-emoji-opt:hover {
+  transform: scale(1.2);
+  background: var(--secondary);
 }
 
 .ci-row {

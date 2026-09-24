@@ -64,6 +64,7 @@
         :avatar="item.uid === userChat.uid ? userPhoto : other.photo"
         :sender-name="item.uid === userChat.uid ? userChat.displayName : other.name"
         :conversation-id="conversationId"
+        @open-lightbox="lightbox = $event"
       />
     </div>
 
@@ -131,7 +132,14 @@ const listRef = ref(null)
 const menuOpen = ref(false)
 const photosOpen = ref(false)
 const lightbox = ref('')
-const otherOnline = ref(false)
+const otherPresence = ref({ online: false, lastSeen: 0 })
+const now = ref(Date.now())
+const otherOnline = computed(
+  () =>
+    otherPresence.value.online &&
+    !!otherPresence.value.lastSeen &&
+    now.value - otherPresence.value.lastSeen < ONLINE_WINDOW
+)
 
 const ONLINE_WINDOW = 25000
 
@@ -158,7 +166,7 @@ let unsubOther = null
 const listenOther = (id) => {
   unsubOther?.()
   unsubOther = null
-  otherOnline.value = false
+  otherPresence.value = { online: false, lastSeen: 0 }
   if (!id) return
   const uid = otherParticipantUid(id, auth.currentUser?.uid || '')
   if (!uid) return
@@ -166,11 +174,12 @@ const listenOther = (id) => {
     doc(db, 'users', uid),
     (d) => {
       const data = d.data() || {}
-      otherOnline.value = !!(
-        data.online &&
-        data.lastSeen &&
-        Date.now() - (data.lastSeen.toMillis?.() || 0) < ONLINE_WINDOW
-      )
+      const ts = data.lastSeen?.toMillis
+        ? data.lastSeen.toMillis()
+        : typeof data.lastSeen === 'number'
+          ? data.lastSeen
+          : 0
+      otherPresence.value = { online: !!data.online, lastSeen: ts }
     },
     () => {}
   )
@@ -203,7 +212,12 @@ watch(
   { immediate: true }
 )
 
+const ticker = setInterval(() => {
+  now.value = Date.now()
+}, 5000)
+
 onUnmounted(() => {
+  clearInterval(ticker)
   unsub?.()
   unsubOther?.()
 })

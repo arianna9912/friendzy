@@ -23,7 +23,7 @@
           <audio ref="audioRef" :src="message.audio" preload="metadata" @timeupdate="onTime" @ended="onEnded"></audio>
         </div>
         <p v-else-if="message.text" class="mb-text">{{ message.text }}</p>
-        <div v-else-if="message.image" class="mb-image">
+        <div v-else-if="message.image" class="mb-image" @click.stop="emit('openLightbox', message.image)">
           <img :src="message.image" alt="Compartida" draggable="false" @contextmenu.prevent @dragstart.prevent />
         </div>
 
@@ -84,6 +84,8 @@ const props = defineProps({
   senderName: { type: String, default: '' },
   conversationId: { type: String, default: '' },
 })
+
+const emit = defineEmits(['openLightbox'])
 
 const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥']
 
@@ -307,6 +309,7 @@ const onEnded = () => {
   max-height: 256px;
   object-fit: contain;
   border-radius: 8px;
+  cursor: zoom-in;
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
   user-select: none;
